@@ -3,7 +3,7 @@
 
 import unittest
 
-import RunObject
+from regression_runner import RunObject
 
 
 class TestRunObject(unittest.TestCase):
@@ -13,7 +13,6 @@ class TestRunObject(unittest.TestCase):
 
     def tearDown(self):
         del self.obj
-
 
     def test_dummy(self):
         self.assertTrue(True)

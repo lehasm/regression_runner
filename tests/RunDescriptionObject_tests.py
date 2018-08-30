@@ -3,13 +3,13 @@
 
 import unittest
 
-from RunDescriptionObject import RunDescriptionObject
+from regression_runner import RunDescriptionObject
 
 
 class TestRun(unittest.TestCase):
 
     def setUp(self):
-        self.obj = RunDescriptionObject()
+        self.obj = RunDescriptionObject.RunDescriptionObject()
 
     def tearDown(self):
         del self.obj
