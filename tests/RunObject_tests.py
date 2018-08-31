@@ -14,6 +14,7 @@ class TestRunObject(unittest.TestCase):
     def tearDown(self):
         del self.obj
 
-    def test_dummy(self):
-        self.assertTrue(True)
+    def test_Init(self):
+        self.assertEqual(self.obj.parallel_processes, 1)
+        self.assertEqual(self.obj.parallel_groups_allowed, False)
 

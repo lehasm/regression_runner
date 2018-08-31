@@ -12,7 +12,7 @@ def SomeFunction():
 class TestRun(unittest.TestCase):
 
     def setUp(self):
-        self.obj = RunDescriptionObject.RunDescriptionObject()
+        self.obj = RunDescriptionObject.RunDescriptionObject("RunDescriptionObject0")
 
     def tearDown(self):
         del self.obj
@@ -65,3 +65,8 @@ class TestRun(unittest.TestCase):
             self.obj.FlattenSubstitutions({"p0": "${p1}", "p1": "${p2}", "p2": "${p0}"})
         with self.assertRaises(KeyError):
             self.obj.FlattenSubstitutions({"p0": "${p1} ${p1}", "p1": "${p2}", "p2": "${p1}"})
+
+    def test_InitFlatSubstitutions(self):
+        self.obj.substitutions = {"p0": "${p1} ${p2}", "p1": "check", "p2": "this"}
+        self.obj.InitFlatSubstitutions()
+        self.assertEqual(self.obj.flat_substitutions, {"p0": "check this",  "p1": "check", "p2": "this"})

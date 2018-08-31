@@ -19,8 +19,11 @@ class RunDescriptionObject(object):
         self.substitutions      = {}
         self.flat_substitutions = {}
 
-    def __init__(self):
+    def __init__(self, name, count = 1, timeout = None):
         self.Reset()
+        self.name = name
+        self.count = count
+        self.timeout = timeout
 
     @staticmethod
     def NormalizeCommands(commands):
@@ -51,7 +54,7 @@ class RunDescriptionObject(object):
     @staticmethod
     def FlattenSubstitutions(substitutions):
         """
-            Substitute iteratively every substitiution entry
+            Substitute iteratively every substitution entry
             Performs substitutions iteratively until there is nothing to substitute or it appears recursive
         """
         iteration_counter = 0
@@ -76,4 +79,4 @@ class RunDescriptionObject(object):
 
 
     def InitFlatSubstitutions(self):
-        pass
+        self.flat_substitutions = self.FlattenSubstitutions(self.substitutions)
