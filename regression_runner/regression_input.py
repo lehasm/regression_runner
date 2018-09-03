@@ -7,6 +7,10 @@ from GroupObject import GroupObject
 from TestObject import TestObject
 
 
+def Substitute(**kwargs):
+    R.UpdateRunContext(kwargs)
+
+
 def Run(**kwargs):
     """ Updates RunObject global configuration and launches regression  """
     for (name, value) in kwargs.iteritems():
@@ -16,7 +20,7 @@ def Run(**kwargs):
 
 
 def Group(name, **kwargs):
-    pass
+    R.AddGroup(name)
 
 
 def Test(name, **kwargs):

@@ -76,17 +76,20 @@ class TestRun(unittest.TestCase):
         self.assertEqual(self.obj.flat_substitutions, {"p0": "check this",  "p1": "check", "p2": "this"})
 
 
-    def test_UpdateSubstitutions(self):
-        self.obj.UpdateSubstitutions({"s0": "v0"})
+    def test_UpdateRunContext(self):
+        self.obj.UpdateRunContext({"s0": "v0"})
         self.assertEqual(self.obj.substitutions, {"s0": "v0"})
-        self.obj.UpdateSubstitutions({"s1": "v1"})
+        self.obj.UpdateRunContext({"count": 1, "s1": "v1"})
         self.assertEqual(self.obj.substitutions, {"s0": "v0", "s1": "v1"})
-        self.obj.UpdateSubstitutions({"s0": "v0_new"})
+        self.obj.UpdateRunContext({"s0": "v0_new"})
         self.assertEqual(self.obj.substitutions, {"s0": "v0_new", "s1": "v1"})
+        self.obj.UpdateRunContext({"count": 10})
+        self.assertEqual(self.obj.substitutions, {"s0": "v0_new", "s1": "v1"})
+        self.assertEqual(self.obj.count, 10)
 
 
     def test_ClearSubstitutions(self):
-        self.obj.UpdateSubstitutions({"s0": "v0"})
+        self.obj.UpdateRunContext({"s0": "v0"})
         self.obj.ClearSubstitutions()
         self.assertEqual(self.obj.substitutions, {})
 

@@ -27,3 +27,7 @@ class TestRun(unittest.TestCase):
         self.assertEqual(R.post_commands, [test_command])
         with self.assertRaises(AttributeError):
             Run(log_path = "unexpected substitiution")
+
+    def test_Substitute(self):
+        Substitute(irun_args = "+define+CONNECT_TEST_DRIVER")
+        self.assertEqual(R.substitutions, {"irun_args": "+define+CONNECT_TEST_DRIVER"})

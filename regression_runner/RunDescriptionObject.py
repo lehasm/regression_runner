@@ -27,8 +27,16 @@ class RunDescriptionObject(object):
         self.timeout = timeout
 
 
-    def UpdateSubstitutions(self, higher_priority_substitutions):
-        self.substitutions.update(higher_priority_substitutions)
+    def UpdateRunContext(self, context_dictionary):
+        """ Looks for existing object members and updates them with values from context_dictionary.
+            Other context_dictionary entries are placed into substitutions of the object """
+        new_substitutions = {}
+        for (name, value) in context_dictionary.iteritems():
+            if (getattr(self, name, None) != None):
+                setattr(self, name, value)
+            else:
+                new_substitutions[name] = value
+        self.substitutions.update(new_substitutions)
 
 
     def ClearSubstitutions(self):
