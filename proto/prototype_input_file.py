@@ -8,21 +8,24 @@ from user point of view
 # Use module with environment and following functions
 from regression_runner import *
 
-# Specify log path
-# (convenient default value may be used, like ./logs/${time_tag},
-# for example results in ./logs/2017_08_20__13_17_08 )
+# Convenient default substitutions exist, like log_path: "./logs/${time_tag}"
+# ( for example, results in ./logs/2017_08_20__13_17_08 )
 #
-# Add custom pattern to substitute (globally available):
-# include all arguments in folder name
-Substitute("log_path", "_".join(["./logs/", time_tag] + Args()))
+# Add custom patterns to substitute (globally available)
+# or update default substitutions
+Substitutions(
+    # include all arguments in log folder name
+    log_path        = "_".join(["./logs/", time_tag] + Args()),
 
-# Environment variables may be accessed
-# "or ..." is used to return default path when PROJECT_PATH is not defined
-Substitute("fw_path", Env("PROJECT_PATH") or "../.." + "/fw")
+    # Environment variables may be accessed
+    # "or ..." is used to return default path when PROJECT_PATH is not defined
+    fw_path         = Env("PROJECT_PATH") or "../.." + "/fw"
+)
+
 
 # Create and initialize test group
 Group(
-    group_name      = "main_tests",
+    name            = "main_tests",
     count           = 5,                # specify test run count
     timeout         = 300,              # set test execution timeout (in seconds)
 
@@ -87,5 +90,5 @@ Run(
     post_commands   = ["echo Time to relax", "shutdown"],
 
     parallel_processes = 2,         # parallel test execution is supported
-    parallel_groups_allowed = 1     # manage parallel group execution
+    parallel_groups_allowed = True  # manage parallel group execution
 )
