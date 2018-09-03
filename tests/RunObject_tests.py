@@ -9,7 +9,7 @@ from regression_runner import RunObject
 class TestRunObject(unittest.TestCase):
 
     def setUp(self):
-        self.obj = RunObject.RunObject()
+        self.obj = RunObject.RunObject("RunObject0")
 
     def tearDown(self):
         del self.obj
