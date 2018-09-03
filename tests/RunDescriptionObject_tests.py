@@ -17,7 +17,7 @@ class TestRun(unittest.TestCase):
     def tearDown(self):
         del self.obj
 
-    def test_reset(self):
+    def test_Reset(self):
         self.obj.Reset()
         self.assertEqual(self.obj.name, "")
         self.assertEqual(self.obj.count, 1)
@@ -26,6 +26,7 @@ class TestRun(unittest.TestCase):
         self.assertEqual(self.obj.test_commands, [])
         self.assertEqual(self.obj.check_commands, [])
         self.assertEqual(self.obj.post_commands, [])
+
 
     def testNormalizeCommands(self):
         self.assertEqual(self.obj.NormalizeCommands(["echo 1", "echo 2"]), ["echo 1", "echo 2"])
@@ -47,10 +48,12 @@ class TestRun(unittest.TestCase):
         self.assertEqual(self.obj.check_commands, [SomeFunction])
         self.assertEqual(self.obj.post_commands , ["echo Done"] )
 
+
     def test_RaiseIfRecursiveSubstitution(self):
         self.obj.RaiseIfRecursiveSubstitution("p0", "( ${p1})")     # no exception
         with self.assertRaises(KeyError):
             self.obj.RaiseIfRecursiveSubstitution("p1", "recursive ${p1}")
+
 
     def test_FlattenSubstitutions(self):
         self.assertEqual(self.obj.FlattenSubstitutions({"p0": "${p1} ${p2}", "p1": "check", "p2": "this"}),
@@ -66,7 +69,24 @@ class TestRun(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.obj.FlattenSubstitutions({"p0": "${p1} ${p1}", "p1": "${p2}", "p2": "${p1}"})
 
+
     def test_InitFlatSubstitutions(self):
         self.obj.substitutions = {"p0": "${p1} ${p2}", "p1": "check", "p2": "this"}
         self.obj.InitFlatSubstitutions()
         self.assertEqual(self.obj.flat_substitutions, {"p0": "check this",  "p1": "check", "p2": "this"})
+
+
+    def test_UpdateSubstitutions(self):
+        self.obj.UpdateSubstitutions({"s0": "v0"})
+        self.assertEqual(self.obj.substitutions, {"s0": "v0"})
+        self.obj.UpdateSubstitutions({"s1": "v1"})
+        self.assertEqual(self.obj.substitutions, {"s0": "v0", "s1": "v1"})
+        self.obj.UpdateSubstitutions({"s0": "v0_new"})
+        self.assertEqual(self.obj.substitutions, {"s0": "v0_new", "s1": "v1"})
+
+
+    def test_ClearSubstitutions(self):
+        self.obj.UpdateSubstitutions({"s0": "v0"})
+        self.obj.ClearSubstitutions()
+        self.assertEqual(self.obj.substitutions, {})
+

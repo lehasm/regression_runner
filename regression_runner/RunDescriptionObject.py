@@ -19,11 +19,21 @@ class RunDescriptionObject(object):
         self.substitutions      = {}
         self.flat_substitutions = {}
 
+
     def __init__(self, name, count = 1, timeout = None):
         self.Reset()
         self.name = name
         self.count = count
         self.timeout = timeout
+
+
+    def UpdateSubstitutions(self, higher_priority_substitutions):
+        self.substitutions.update(higher_priority_substitutions)
+
+
+    def ClearSubstitutions(self):
+        self.substitutions = {}
+
 
     @staticmethod
     def NormalizeCommands(commands):
@@ -38,11 +48,13 @@ class RunDescriptionObject(object):
                 raise TypeError("Commands may be single string, function or a list of strings or functions")
         return normalized_commands
 
+
     def NormalizeAllCommands(self):
         self.pre_commands   = self.NormalizeCommands(self.pre_commands)
         self.test_commands = self.NormalizeCommands(self.test_commands)
         self.check_commands = self.NormalizeCommands(self.check_commands)
         self.post_commands = self.NormalizeCommands(self.post_commands)
+
 
     @staticmethod
     def RaiseIfRecursiveSubstitution(key, text):
@@ -50,6 +62,7 @@ class RunDescriptionObject(object):
         pattern = "${" + key + "}"
         if (pattern in text):
             raise KeyError("Recursive substitution is detected for %s => %s".format(key, text))
+
 
     @staticmethod
     def FlattenSubstitutions(substitutions):
@@ -80,3 +93,5 @@ class RunDescriptionObject(object):
 
     def InitFlatSubstitutions(self):
         self.flat_substitutions = self.FlattenSubstitutions(self.substitutions)
+
+
