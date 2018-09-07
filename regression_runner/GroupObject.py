@@ -18,5 +18,7 @@ class GroupObject(RunDescriptionObject):
         self.tests[test.name] = test
 
     def __iter__(self):
-        for test in self.tests:
-            yield test
+        for test in self.tests.itervalues():
+            for i in xrange(0, test.count):
+                test.UpdateRunContext({"i": i})
+                yield test

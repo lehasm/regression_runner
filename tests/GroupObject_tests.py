@@ -25,8 +25,13 @@ class TestGroupObject(unittest.TestCase):
         self.assertEqual(self.obj.tests, {self._test0.name: self._test0, self._test1.name: self._test1})
 
     def test_iter(self):
-        print "Testing generator"
+        self._test0.count = 4
+        self._test1.count = 2
+        ref_seq =  [("test1", i) for i in xrange(0, self._test1.count)]
+        ref_seq += [("test0", i) for i in xrange(0, self._test0.count)]
+        gen_seq = []
         self.obj.AddTest(self._test0)
         self.obj.AddTest(self._test1)
         for t in self.obj:
-            print t
+            gen_seq.append( (t.name, t.substitutions["i"]) )
+        self.assertEqual(gen_seq, ref_seq)
