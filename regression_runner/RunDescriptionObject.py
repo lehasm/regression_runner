@@ -58,6 +58,7 @@ class RunDescriptionObject(object):
 
 
     def NormalizeAllCommands(self):
+		
         self.pre_commands   = self.NormalizeCommands(self.pre_commands)
         self.test_commands = self.NormalizeCommands(self.test_commands)
         self.check_commands = self.NormalizeCommands(self.check_commands)
@@ -100,6 +101,7 @@ class RunDescriptionObject(object):
 
 
     def InitFlatSubstitutions(self):
+        logging.info("{}.{}".format(self.name, __name__))
         self.flat_substitutions = self.FlattenSubstitutions(self.substitutions)
 
 
