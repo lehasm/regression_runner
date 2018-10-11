@@ -7,6 +7,7 @@ from GroupObject import GroupObject
 from TestObject import TestObject
 
 import sys
+import os
 
 
 def Args(i = None):
@@ -25,6 +26,9 @@ def Args(i = None):
         return ""
 
 
+def Env(name):
+    return os.getenv(name) or ""
+
 def Substitute(**kwargs):
     R.UpdateRunContext(kwargs)
 
@@ -38,8 +42,12 @@ def Run(**kwargs):
 
 
 def Group(name, **kwargs):
-    R.AddGroup(name)
+    g = GroupObject(name)
+    g.UpdateRunContext(kwargs)
+    R.AddGroup(g)
 
 
 def Test(name, **kwargs):
-    pass
+    t = TestObject(name)
+    t.UpdateRunContext(kwargs)
+    R.AddTest(t)

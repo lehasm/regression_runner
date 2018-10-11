@@ -3,6 +3,7 @@
 
 import unittest
 import sys
+import os
 
 from regression_runner import *
 from regression_runner.RunObject import *
@@ -39,3 +40,9 @@ class TestRun(unittest.TestCase):
         self.assertEqual(Args(), ["A0", "A1"])
         self.assertEqual(Args(0), "A0")
         self.assertEqual(Args(1), "A1")
+
+    def test_Env(self):
+        test_name = "TEST_ENV_VAR"
+        test_value = "TEST_VALUE"
+        os.environ[test_name] = test_value
+        self.assertEqual(Env(test_name), test_value)

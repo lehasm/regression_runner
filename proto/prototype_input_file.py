@@ -8,14 +8,15 @@ from user point of view
 # Use module with environment and following functions
 from regression_runner import *
 
-# Convenient default substitutions exist, like log_path: "./logs/${time_tag}"
+# Convenient default substitutions exist, like ${log_path}: "./logs/${time_tag}"
 # ( for example, results in ./logs/2017_08_20__13_17_08 )
 #
 # Add custom patterns to substitute (globally available)
 # or update default substitutions
-Substitutions(
+Substitute(
+    # Override default substitution:
     # include all arguments in log folder name
-    log_path        = "_".join(["./logs/", time_tag] + Args()),
+    log_path        = "_".join(["./logs/${time_tag}"] + Args()),
 
     # Environment variables may be accessed
     # "or ..." is used to return default path when PROJECT_PATH is not defined
@@ -30,8 +31,8 @@ Group(
     timeout         = 300,              # set test execution timeout (in seconds)
 
     # Substitution patterns may be specified even here (more clear look)
-    test_log        = "${log_path}/${test_name}.${run_index}.log"
-    test_fw         = "${fw_path}/${test_name}"
+    test_log        = "${log_path}/${test_name}.${run_index}.log",
+    test_fw         = "${fw_path}/${test_name}",
 
     # A list of commands is enclosed in '[', ']' (single command - just an ordinary string)
     test_commands   = [
@@ -44,11 +45,11 @@ Group(
 
     # Predefined check scripts are available
     # The following constructs check script which analyse log file (or files)
-    # to find required and forbidden strings
+    # to find required and forbidden strings (string lists may be used)
     test_check      = CreateLogFilter(
-                        "${test_log}"
-                        required_string     = "TEST DONE",
-                        forbidden_string    = "TEST ERROR"
+                        "${test_log}",
+                        required_strings    = "TEST DONE",
+                        forbidden_strings   = ["TEST ERROR", "*E"]
                         ),
     # check_script return codes are used in summary output
     # None or empty list - successful check
