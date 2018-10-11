@@ -3,6 +3,7 @@ from RunDescriptionObject import RunDescriptionObject
 from GroupObject import GroupObject
 
 import logging
+from time import gmtime, strftime
 
 class RunObject(RunDescriptionObject):
     """ Class to manage regression run  """
@@ -17,6 +18,11 @@ class RunObject(RunDescriptionObject):
         self.parallel_groups_allowed = False
         self.groups = {}
         self.AddGroup(GroupObject(self._default_group_name))
+        self.AddDefaultSubstitutions()
+
+    def AddDefaultSubstitutions(self):
+        self.substitutions["time_tag"] = strftime("%Y_%m_%d__%H_%M_%S", gmtime())
+        self.substitutions["log_path"] = "./logs/${time_tag}"
 
 
     def AddGroup(self, g):

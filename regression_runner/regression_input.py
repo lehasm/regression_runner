@@ -6,6 +6,24 @@ from RunObject import RunObject, R
 from GroupObject import GroupObject
 from TestObject import TestObject
 
+import sys
+
+
+def Args(i = None):
+    """
+    Simplifies way to get command line arguments
+    Reorganizes sys.argv: excludes its zero argument,
+    numbers remaining arguments starting with zero.
+    Returns argument with index passed,   
+    returns reorganized array if called without i (Args())
+    """
+    if (i is None):
+        return sys.argv[1:]
+    elif (0 <= i < len(sys.argv)-1):
+        return sys.argv[1 + i]
+    else:    
+        return ""
+
 
 def Substitute(**kwargs):
     R.UpdateRunContext(kwargs)

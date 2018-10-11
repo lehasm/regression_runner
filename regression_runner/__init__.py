@@ -2,7 +2,7 @@
 The package is used to run tests and analyse run output.
 """
 
-from regression_input import Substitute, Test, Group, Run
+from regression_input import Substitute, Test, Group, Run, Args
 from action_templates import *
 
 import logging

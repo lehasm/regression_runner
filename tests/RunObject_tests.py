@@ -18,3 +18,13 @@ class TestRunObject(unittest.TestCase):
         self.assertEqual(self.obj.parallel_processes, 1)
         self.assertEqual(self.obj.parallel_groups_allowed, False)
 
+    def test_AddDefaultSubstitutions(self):
+        self.assertIn("time_tag", self.obj.substitutions)
+        self.obj.substitutions["time_tag"] = ""
+        self.assertEqual(self.obj.substitutions, 
+            {
+                "log_path" : "./logs/${time_tag}",
+                "time_tag" : "",    # has been overriden above
+            })
+        
+

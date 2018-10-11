@@ -2,6 +2,7 @@
 # python -m unittest tests.regression_input_tests
 
 import unittest
+import sys
 
 from regression_runner import *
 from regression_runner.RunObject import *
@@ -29,5 +30,12 @@ class TestRun(unittest.TestCase):
             Run(log_path = "unexpected substitiution")
 
     def test_Substitute(self):
+        R.substitutions = {}
         Substitute(irun_args = "+define+CONNECT_TEST_DRIVER")
         self.assertEqual(R.substitutions, {"irun_args": "+define+CONNECT_TEST_DRIVER"})
+        
+    def test_Args(self):
+        sys.argv = ["run_path", "A0", "A1"]
+        self.assertEqual(Args(), ["A0", "A1"])
+        self.assertEqual(Args(0), "A0")
+        self.assertEqual(Args(1), "A1")
