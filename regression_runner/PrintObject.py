@@ -1,21 +1,23 @@
 """
-Outputs run progress. May be called from different processes
+Outputs run information
 """
 
-from multiprocessing import Lock
-
+from RunObject import RunObject 
 
 class PrintObject:
 
     def __init__(self):
-        self.lock = Lock()
+        pass
 
-        
-    def Print(self, message):
-        self.lock.acquire()
-        self.PrintFunction(message)
-        self.lock.release()
-        
+            
     def PrintFunction(self, message):
         print(message)
         
+        
+    def PrintSessionHeader(self, r):
+        if (not isinstance(r, RunObject)):
+            raise TypeError()
+        self.PrintFunction("""
+        #Session header
+        {}
+        """.format(r))

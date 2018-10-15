@@ -3,7 +3,7 @@
 
 import unittest
 
-from regression_runner import PrintObject
+from regression_runner import PrintObject, RunObject
 
 import sys
 
@@ -29,9 +29,7 @@ class TestPrintObject(unittest.TestCase):
     def tearDown(self):
         del self.obj
 
-    def test_Print(self):
-        test_message = "test message"
-        self.obj.Print(test_message)
-        self.obj.Print(test_message)
-        self.assertEqual(self.test_stdout.data, [test_message, '\n'] * 2)
-        
+    def test_exceptions(self):
+        with self.assertRaises(TypeError):
+            self.obj.PrintSessionHeader(self)
+        self.obj.PrintSessionHeader(RunObject.RunObject(""))

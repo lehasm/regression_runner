@@ -36,9 +36,14 @@ class RunObject(RunDescriptionObject):
         self.groups[group_name or self.active_group_name].AddTest(t)
 
 
-    def Run(self):
+    def Run(self, **kwargs):
+        self.UpdateRunContext(kwargs)
+        self.printer = PrintObject()
+        self.printer.PrintSessionHeader(self)
+        
+        self.InitFlatSubstitutions()
+        self.pool = MyPool(self.parallel_processes)
         if(self.trail_run):
             return
-
 
 R = RunObject("RunObject")
