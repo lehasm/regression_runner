@@ -28,10 +28,16 @@ class MyPool(multiprocessing.pool.Pool):
 #
 
 import subprocess
+import logging
 
-def RunCommands(commands, log_file):
+def RunCommands(commands, log_file = None):
+    max_commands = 3
+    logging.info("Run commands: {} {}".format(commands[0:max_commands], 
+                    "" if len(commands) < max_commands else 
+                    "(not all commands shown)"))
     return_codes = []
     for c in commands:
+        logging.debug("Run command {}".format(c))
         return_codes.append(
             subprocess.call(c, stdout=log_file, stderr=log_file, shell=True))
     return return_codes
@@ -39,7 +45,7 @@ def RunCommands(commands, log_file):
 
 def RunCommandsWithTimeout(commands, timeout, test_result):
     p = multiprocessing.Pool(1)
-    result = p.apply_async(func = RunCommands, args=(commnds,))
+    result = p.apply_async(func = RunCommands, args=(commands, test_result.log_file))
     try:
         test_result.return_codes = result.get(timeout)
     except multiprocessing.TimeoutError:
