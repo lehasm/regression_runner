@@ -93,3 +93,13 @@ class TestRun(unittest.TestCase):
         self.obj.ClearSubstitutions()
         self.assertEqual(self.obj.substitutions, {})
 
+
+    def test_GetLogName(self):
+        self.obj.name = "N"
+        self.assertEqual(self.obj.GetLogName(), "N.log")
+        self.obj.count = 5
+        self.assertEqual(self.obj.GetLogName(0), "N_0.log")
+        self.obj.count = 10
+        self.assertEqual(self.obj.GetLogName(9), "N_9.log")
+        self.obj.count = 110
+        self.assertEqual(self.obj.GetLogName(0), "N_000.log")

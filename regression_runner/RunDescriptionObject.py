@@ -1,5 +1,6 @@
 
 import string
+import math
 import logging      # logging configuration is placed in a package __index__.py
 
 
@@ -106,3 +107,9 @@ class RunDescriptionObject(object):
         self.flat_substitutions = self.FlattenSubstitutions(self.substitutions)
 
 
+    def GetLogName(self, run_index = None):
+        log_name = self.name
+        if (run_index != None):
+            width = int(math.ceil(math.log10(self.count)))
+            log_name += "_{0:0{w}d}".format(run_index, w = width)
+        return log_name + ".log"
