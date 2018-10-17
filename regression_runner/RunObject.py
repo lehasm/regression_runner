@@ -1,6 +1,10 @@
 
 from RunDescriptionObject import RunDescriptionObject
 from GroupObject import GroupObject
+from TestResultObject import TestResultObject
+from PrintObject import PrintObject
+from run_facilities import *
+
 
 import logging
 from time import gmtime, strftime
@@ -39,11 +43,14 @@ class RunObject(RunDescriptionObject):
     def Run(self, **kwargs):
         self.UpdateRunContext(kwargs)
         self.printer = PrintObject()
-        self.printer.PrintSessionHeader(self)
-        
+        self.printer.PrintSessionHeader(self)        
         self.InitFlatSubstitutions()
-        self.pool = MyPool(self.parallel_processes)
-        if(self.trail_run):
-            return
+        if len(self.pre_commands) > 0: 
+            logging.info("pre_commands")
+            self.pre_commands_result = TestResultObject(self.GetLogName())
+            RunCommandsWithTimeout(self.pre_commands, 
+                                   self.timeout, 
+                                   self.pre_commands_result)
+        
 
 R = RunObject("RunObject")

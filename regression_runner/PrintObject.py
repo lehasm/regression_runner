@@ -2,7 +2,7 @@
 Outputs run information
 """
 
-from RunObject import RunObject 
+import RunObject, GroupObject, TestObject 
 
 class PrintObject:
 
@@ -15,7 +15,7 @@ class PrintObject:
         
         
     def PrintSessionHeader(self, r):
-        if (not isinstance(r, RunObject)):
+        if (not isinstance(r, RunObject.RunObject)):
             raise TypeError()
         self.PrintFunction("""
         #Session header
