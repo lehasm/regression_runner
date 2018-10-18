@@ -45,12 +45,7 @@ class RunObject(RunDescriptionObject):
         self.printer = PrintObject()
         self.printer.PrintSessionHeader(self)        
         self.InitFlatSubstitutions()
-        if len(self.pre_commands) > 0: 
-            logging.info("pre_commands")
-            self.pre_commands_result = TestResultObject(self.GetLogName())
-            RunCommandsWithTimeout(self.pre_commands, 
-                                   self.timeout, 
-                                   self.pre_commands_result)
-        
+     
+    
 
 R = RunObject("RunObject")

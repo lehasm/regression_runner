@@ -4,6 +4,10 @@ import math
 import logging      # logging configuration is placed in a package __index__.py
 
 
+from TestResultObject import TestResultObject
+from run_facilities import *
+
+
 class RunDescriptionObject(object):
     """ Data and functions common to any level: test, group, global run. """
 
@@ -113,3 +117,32 @@ class RunDescriptionObject(object):
             width = int(math.ceil(math.log10(self.count)))
             log_name += "_{0:0{w}d}".format(run_index, w = width)
         return log_name + ".log"
+
+    
+    def _RunInner(self):
+        """
+        Virtual function which runs actual object activities
+        """
+        logging.info("run main activities")
+
+    
+    def _RunAll(self):
+        """
+        Runs pre and post commands, calls _RunInner
+        to run test commands or run commands of containing objects
+        """
+        logging.info("pre_commands")
+        self.pre_commands_result = TestResultObject(self.GetLogName())
+        RunCommandsWithTimeout(self.pre_commands, 
+                               self.timeout, 
+                               self.pre_commands_result)
+        
+        self._RunInner()
+                       
+        logging.info("post_commands")
+        self.post_commands_result = TestResultObject(self.GetLogName())
+        RunCommandsWithTimeout(self.post_commands, 
+                               self.timeout, 
+                               self.post_commands_result)
+    
+        
