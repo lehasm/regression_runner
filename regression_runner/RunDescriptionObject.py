@@ -140,7 +140,7 @@ class RunDescriptionObject(object):
         self._RunInner()
                        
         logging.info("post_commands")
-        self.post_commands_result = TestResultObject(self.GetLogName())
+        self.post_commands_result = ResultObject(self.GetLogName())
         RunCommandsWithTimeout(self.post_commands, 
                                self.timeout, 
                                self.post_commands_result)
