@@ -23,15 +23,17 @@ class TestRun(unittest.TestCase):
 
         temp_name = "test_RunCommands.log"
         test_string = "test"
-        with open(temp_name, 'w') as f:
-            self.assertEqual(RunCommands(["echo " + test_string], f), [0])
+        self.assertEqual(RunCommands(["echo " + test_string], temp_name), [0])
         with open(temp_name, 'r') as f:
             f_content = f.read()
-            self.assertEqual(f_content, test_string + "\n")
-        os.remove(temp_name)
+            f.close()
+            os.remove(temp_name)
+            self.assertEqual(f_content, 
+                "\n> echo {0}\n{0}\n".format(test_string))
+            
         
     def test_RunCommandsWithTimeout(self):
-        test_result = ResultObject("test_result")
+        test_result = ResultObject("test.log")
         timeout = 1
         return_codes = [0, 1, 255]
         commands = ["exit {}".format(r) for r in return_codes]
