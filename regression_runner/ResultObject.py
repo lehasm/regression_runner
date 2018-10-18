@@ -1,4 +1,6 @@
 
+import os, os.path
+
 class ResultObject():
     """ Class to store test run results and to manage log file """
 
@@ -8,9 +10,8 @@ class ResultObject():
         self.passed = False
         self.log_file_name = log_file_name
     
-    
         
-    def CloseLog(self):
-         if self._log_file:
-            self._log_file.close()
+    def RemoveLog(self):
+         if self.log_file_name and os.path.exists(self.log_file_name):
+            os.remove(self.log_file_name)
         

@@ -38,6 +38,7 @@ class TestRun(unittest.TestCase):
         return_codes = [0, 1, 255]
         commands = ["exit {}".format(r) for r in return_codes]
         RunCommandsWithTimeout(commands, timeout, test_result)
+        test_result.RemoveLog()
         self.assertEqual(test_result.return_codes, return_codes)
         self.assertEqual(test_result.timeout, False)
         

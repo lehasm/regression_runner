@@ -11,6 +11,6 @@ class TestResultObject(unittest.TestCase):
         self.obj = ResultObject.ResultObject(self.log_name)
 
     def tearDown(self):
-        os.remove(self.log_name)
+        self.obj.RemoveLog()
 
     

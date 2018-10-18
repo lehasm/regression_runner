@@ -103,3 +103,13 @@ class TestRun(unittest.TestCase):
         self.assertEqual(self.obj.GetLogName(9), "N_9.log")
         self.obj.count = 110
         self.assertEqual(self.obj.GetLogName(0), "N_000.log")
+
+
+    def test_RunAll(self):
+        self.obj.name = "test_RunAll"
+        self.obj.pre_commands = ["echo pre_commands"]
+        self.obj.post_commands = ["echo post_commands"]
+        self.obj._RunAll()
+        self.obj.pre_commands_result.RemoveLog()
+        self.obj.post_commands_result.RemoveLog()
+        
