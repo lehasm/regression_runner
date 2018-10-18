@@ -1,7 +1,7 @@
 
 from RunDescriptionObject import RunDescriptionObject
 from GroupObject import GroupObject
-from TestResultObject import TestResultObject
+from ResultObject import ResultObject
 from PrintObject import PrintObject
 from run_facilities import *
 

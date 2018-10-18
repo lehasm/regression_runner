@@ -4,7 +4,7 @@ import math
 import logging      # logging configuration is placed in a package __index__.py
 
 
-from TestResultObject import TestResultObject
+from ResultObject import ResultObject
 from run_facilities import *
 
 
@@ -132,7 +132,7 @@ class RunDescriptionObject(object):
         to run test commands or run commands of containing objects
         """
         logging.info("pre_commands")
-        self.pre_commands_result = TestResultObject(self.GetLogName())
+        self.pre_commands_result = ResultObject(self.GetLogName())
         RunCommandsWithTimeout(self.pre_commands, 
                                self.timeout, 
                                self.pre_commands_result)

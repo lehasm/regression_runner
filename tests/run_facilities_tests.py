@@ -5,7 +5,7 @@ import unittest
 import os
 
 from regression_runner.run_facilities import *
-from regression_runner.TestResultObject import TestResultObject
+from regression_runner.ResultObject import ResultObject
 
 
 class TestRun(unittest.TestCase):
@@ -31,7 +31,7 @@ class TestRun(unittest.TestCase):
         os.remove(temp_name)
         
     def test_RunCommandsWithTimeout(self):
-        test_result = TestResultObject("test_result")
+        test_result = ResultObject("test_result")
         timeout = 1
         return_codes = [0, 1, 255]
         commands = ["exit {}".format(r) for r in return_codes]
