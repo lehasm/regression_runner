@@ -3,7 +3,7 @@ from RunDescriptionObject import RunDescriptionObject
 from GroupObject import GroupObject
 from ResultObject import ResultObject
 from PrintObject import PrintObject
-from run_facilities import *
+from RunPool import *
 
 
 import logging

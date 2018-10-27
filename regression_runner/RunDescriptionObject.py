@@ -5,7 +5,7 @@ import logging      # logging configuration is placed in a package __index__.py
 
 
 from ResultObject import ResultObject
-from run_facilities import *
+from RunPool import *
 
 
 class RunDescriptionObject(object):

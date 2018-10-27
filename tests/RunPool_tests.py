@@ -1,10 +1,10 @@
 # To call form command line:
-# python -m unittest tests.run_facilities_tests
+# python -m unittest tests.RunPool_tests
 
 import unittest
 import os
 
-from regression_runner.run_facilities import *
+from regression_runner.RunPool import *
 from regression_runner.ResultObject import ResultObject
 
 
