@@ -1,15 +1,28 @@
-"""
-Functions and auxiliary classes to run commands 
+﻿"""
+Main class and auxiliary classes to run commands 
 in separate processes with timeout
 """
 
+"""
+Перебор команд.
 
-#
-# Auxiliary classes to support multiprocessing
-#
+Вызвать функцию для выполнения команд
+Если нет свободных параллельных процессов, то ждать, 
+когда какой-нибудь освободится.
+Если есть свободные, то запустить асинхронное выполнение с таймаутом.
+
+Для не пересечения групп иметь возможность ожидать, когда завершаться все выполняемые процессы.
+
+Все начальные команды группы должны завершиться до запуск тестов из группы.
+
+Как возвращать результаты выполнения команд?
+Для задачи нужно задавать номер и возвращать по номеру
+"""
 
 import multiprocessing
 import multiprocessing.pool
+import subprocess
+import logging
 
 
 class NoDaemonProcess(multiprocessing.Process):
@@ -19,16 +32,6 @@ class NoDaemonProcess(multiprocessing.Process):
         pass
     daemon = property(_get_daemon, _set_daemon)
 
-class MyPool(multiprocessing.pool.Pool):
-    Process = NoDaemonProcess
-
-
-#
-# Run commands
-#
-
-import subprocess
-import logging
 
 def RunCommands(commands, log_file_name = None):
     max_commands = 3
@@ -53,13 +56,44 @@ def RunCommands(commands, log_file_name = None):
     return return_codes
 
 
-def RunCommandsWithTimeout(commands, timeout, test_result):
-    p = multiprocessing.Pool(1)
-    r = p.apply_async(func = RunCommands, args=(commands, test_result.log_file_name))
-    try:
-        test_result.return_codes = r.get(timeout)
-    except multiprocessing.TimeoutError:
-        p.terminate()
-        test_result.timeout = True
+class RunPool(multiprocessing.pool.Pool):
+    Process = NoDaemonProcess
+
+    def __init__(self, processes):
+        super(RunPool, self).__init__(processes)
+        self.processes = processes
+        self.next_process_id = 0
+        self.running_result_objects = {}
+        self.finished_result_objects = {}
+
+
+    def WaitAnyProcessToFinish(self):
+        pass
+
+    def ExecuteCommands(self, commands, timeout, test_result):
+        """
+        Sends commands to pool if there are free workers
+        If all workers are busy then wait for any to finish
+        """
+        func = self.RunCommandsWithTimeout
+        args = (commands, timeout, test_result)
+        
+        if (len(self.running_result_objects) >= self.processes):
+            self.WaitAnyProcessToFinish()
+        
+        r = self.apply_async(func = func, args = args)
+        self.running_result_objects[self.next_process_id] = r
+        self.next_process_id += 1
+        
     
-    
+
+    @staticmethod
+    def RunCommandsWithTimeout(commands, timeout, test_result):
+        p = multiprocessing.Pool(1)
+        r = p.apply_async(func = RunCommands, args=(commands, test_result.log_file_name))
+        try:
+            test_result.return_codes = r.get(timeout)
+        except multiprocessing.TimeoutError:
+            p.terminate()
+            test_result.timeout = True
+
