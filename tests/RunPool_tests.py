@@ -15,12 +15,15 @@ class TestRun(unittest.TestCase):
         self.processes = 2
         self.obj = RunPool(self.processes)
         self.result_object = ResultObject()
-        self.long_commands = ["sleep 5" for i in range(3)]
-        self.immediate_commands = ["echo i" for i in range(3)]
+        self.long_commands = ["sleep 5"]
+        self.immediate_commands = ["exit {}".format(i) for i in range(3)]
 
     def tearDown(self):
         pass
 
+    def StartSomeImmediateCommands(self, count):
+        for i in range(count):
+            self.obj.StartCommandsExecution(self.immediate_commands, 10, self.result_object)
 
     def test_Init(self):
         self.assertEqual(self.obj.processes, self.processes)
@@ -41,8 +44,31 @@ class TestRun(unittest.TestCase):
         self.assertEqual(len(self.obj.finished_result_objects), count)
         
         
+    def test_WaitAnyCommandsExecution(self):
+        count = 3
+        self.StartSomeImmediateCommands(count)
+        ids = []
+        for i in range(count):
+            ids.append(self.obj.WaitAnyCommandsExecution())
+        self.assertEqual(sorted(ids), range(count))
+        self.assertEqual(self.obj.WaitAnyCommandsExecution(), False)
+    
+    
+    def test_WaitCommandsExecution(self):
+        count = 2
+        self.StartSomeImmediateCommands(count)
+        
+        with self.assertRaises(AssertionError):
+            self.obj.WaitCommandsExecution(count + 1)    
+    
+        for i in range(count):
+            self.obj.WaitCommandsExecution(i)
+        
+        with self.assertRaises(AssertionError):
+            self.obj.WaitCommandsExecution(0)    
+    
 
-#    @unittest.skip("skip while debugging")
+    #@unittest.skip("skip while debugging")
     def test_RunCommands(self):
         return_codes = [0, 1, 255]
         commands = ["exit {}".format(r) for r in return_codes]
@@ -58,7 +84,7 @@ class TestRun(unittest.TestCase):
             self.assertEqual(f_content, 
                 "\n> echo {0}\n{0}\n".format(test_string))
             
-#    @unittest.skip("skip while debugging")    
+    #@unittest.skip("skip while debugging")    
     def test_RunCommandsWithTimeout(self):
         test_result = ResultObject("test.log")
         timeout = 1

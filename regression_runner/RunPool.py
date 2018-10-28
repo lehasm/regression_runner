@@ -114,6 +114,37 @@ class RunPool(multiprocessing.pool.Pool):
         
         return self.last_process_id
     
+    
+    def WaitAnyCommandsExecution(self):
+        """
+        Returns any finished process id
+        or False if there is nothing to return or wait
+        """
+        if (len(self.finished_result_objects) == 0 and
+            len(self.running_result_objects) == 0):
+                return False
+        
+        while True:
+            self.TraverseResultObjects()
+            if (len(self.finished_result_objects) > 0):
+                (id, v) = self.finished_result_objects.popitem()
+                return id
+            else:
+                time.sleep(self.traverse_interval)            
+
+                    
+    def WaitCommandsExecution(self, id):
+        """
+        Returns when the process with given id has finished        
+        If id is unknown to the class then rises exception
+        """        
+        assert(id in self.finished_result_objects or
+               id in self.running_result_objects)
+        if (id in self.running_result_objects):
+            self.running_result_objects[id].wait()
+            self.TraverseResultObjects()
+        del self.finished_result_objects[id]
+    
 
     @staticmethod
     def RunCommandsWithTimeout(commands, timeout, test_result):
