@@ -6,6 +6,7 @@ class ResultObject():
 
     def __init__(self, log_file_name = None):
         self.state = "waiting"
+        self.return_codes = []
         self.timeout = False
         self.passed = False
         self.log_file_name = log_file_name
