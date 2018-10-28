@@ -22,6 +22,7 @@ in separate processes with timeout
 import multiprocessing
 import multiprocessing.pool
 import subprocess
+import time
 import logging
 
 
@@ -62,29 +63,56 @@ class RunPool(multiprocessing.pool.Pool):
     def __init__(self, processes):
         super(RunPool, self).__init__(processes)
         self.processes = processes
-        self.next_process_id = 0
+        self.last_process_id = -1
         self.running_result_objects = {}
         self.finished_result_objects = {}
+        self.traverse_interval = 1
+
+    #def __del__(self):
+        # The following commands in __del__ rises exception ...
+    def TerminateAll(self):
+        self.terminate()
+        self.join()
+
+    def TraverseResultObjects(self):
+        """
+        Iterates over result objects to find finished processes
+        Moves these result objects to finished processes array
+        """
+        actual_running_result_objects = {}
+        for (id, result_object) in self.running_result_objects.iteritems():
+            if result_object.ready():
+                self.finished_result_objects[id] = result_object
+            else:
+                actual_running_result_objects[id] = result_object
+        self.running_result_objects = actual_running_result_objects
 
 
-    def WaitAnyProcessToFinish(self):
-        pass
-
-    def ExecuteCommands(self, commands, timeout, test_result):
+    def WaitFreeWorkers(self, free_count = 1):
+        assert (0 <= free_count <= self.processes)
+        while True:
+            self.TraverseResultObjects()
+            if (len(self.running_result_objects) <= 
+                self.processes - free_count):
+                break
+            else:
+                time.sleep(self.traverse_interval)
+            
+        
+    def StartCommandsExecution(self, commands, timeout, test_result):
         """
         Sends commands to pool if there are free workers
         If all workers are busy then wait for any to finish
         """
+        self.last_process_id += 1
         func = self.RunCommandsWithTimeout
         args = (commands, timeout, test_result)
-        
-        if (len(self.running_result_objects) >= self.processes):
-            self.WaitAnyProcessToFinish()
+        self.WaitFreeWorkers()
         
         r = self.apply_async(func = func, args = args)
-        self.running_result_objects[self.next_process_id] = r
-        self.next_process_id += 1
+        self.running_result_objects[self.last_process_id] = r
         
+        return self.last_process_id
     
 
     @staticmethod
