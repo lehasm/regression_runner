@@ -5,7 +5,7 @@ import unittest
 import os, time
 
 from regression_runner.RunPool import RunPool
-from regression_runner.RunPool import RunCommands
+from regression_runner.RunPool import RunCommands, RunCommandsWithTimeout
 from regression_runner.ResultObject import ResultObject
 
 
@@ -15,7 +15,6 @@ class TestRun(unittest.TestCase):
         self.processes = 2
         self.obj = RunPool(self.processes)
         self.result_object = ResultObject()
-        self.long_commands = ["sleep 5"]
         self.immediate_commands = ["exit {}".format(i) for i in range(3)]
 
     def tearDown(self):
@@ -67,6 +66,16 @@ class TestRun(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.obj.WaitCommandsExecution(0)    
     
+    
+    def test_Execution(self):
+        id = self.obj.StartCommandsExecution(["sleep 1", "exit 2"],
+                10, self.result_object)        
+        self.assertTrue(id in self.obj.running_result_objects)
+        self.obj.WaitCommandsExecution(id)
+        self.assertTrue(id not in self.obj.finished_result_objects)
+        self.assertEqual(self.result_object.return_codes, [0, 2])
+        
+        
 
     #@unittest.skip("skip while debugging")
     def test_RunCommands(self):
@@ -90,11 +99,11 @@ class TestRun(unittest.TestCase):
         timeout = 1
         return_codes = [0, 1, 255]
         commands = ["exit {}".format(r) for r in return_codes]
-        RunPool.RunCommandsWithTimeout(commands, timeout, test_result)
+        RunCommandsWithTimeout(commands, timeout, test_result)
         test_result.RemoveLog()
         self.assertEqual(test_result.return_codes, return_codes)
         self.assertEqual(test_result.timeout, False)
         
-        RunPool.RunCommandsWithTimeout(["sleep {}".format(timeout + 1)], timeout, test_result)
+        RunCommandsWithTimeout(["sleep {}".format(timeout + 1)], timeout, test_result)
         self.assertEqual(test_result.timeout, True)
         

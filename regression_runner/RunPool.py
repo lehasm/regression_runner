@@ -35,11 +35,6 @@ class NoDaemonProcess(multiprocessing.Process):
 
 
 def RunCommands(commands, log_file_name = None):
-    max_commands = 3
-    logging.info("Run commands: {} {}".format(commands[0:max_commands], 
-                    "" if len(commands) < max_commands else 
-                    "(not all commands shown)"))
-                    
     log_file = open(log_file_name, "a") if log_file_name else None
     command_string = "\n> {}\n"
     return_codes = []
@@ -57,6 +52,22 @@ def RunCommands(commands, log_file_name = None):
     return return_codes
 
 
+def RunCommandsWithTimeout(commands, timeout, test_result):
+    max_commands = 3
+    logging.info("Run commands (timeout = {}): {} {}".format(
+                timeout, commands[0:max_commands], 
+                    "" if len(commands) < max_commands else 
+                    "(not all commands shown)"))
+
+    p = multiprocessing.Pool(1)
+    r = p.apply_async(func = RunCommands, args=(commands, test_result.log_file_name))
+    try:
+        test_result.return_codes = r.get(timeout)
+    except multiprocessing.TimeoutError:
+        p.terminate()
+        test_result.timeout = True
+
+
 class RunPool(multiprocessing.pool.Pool):
     Process = NoDaemonProcess
 
@@ -68,8 +79,6 @@ class RunPool(multiprocessing.pool.Pool):
         self.finished_result_objects = {}
         self.traverse_interval = 1
 
-    #def __del__(self):
-        # The following commands in __del__ rises exception ...
     def TerminateAll(self):
         self.terminate()
         self.join()
@@ -105,7 +114,7 @@ class RunPool(multiprocessing.pool.Pool):
         If all workers are busy then wait for any to finish
         """
         self.last_process_id += 1
-        func = self.RunCommandsWithTimeout
+        func = RunCommandsWithTimeout
         args = (commands, timeout, test_result)
         self.WaitFreeWorkers()
         
@@ -148,15 +157,3 @@ class RunPool(multiprocessing.pool.Pool):
     
     def WaitAllCommandsExecution(self):
         self.WaitFreeWorkers(self.processes)
-
-
-    @staticmethod
-    def RunCommandsWithTimeout(commands, timeout, test_result):
-        p = multiprocessing.Pool(1)
-        r = p.apply_async(func = RunCommands, args=(commands, test_result.log_file_name))
-        try:
-            test_result.return_codes = r.get(timeout)
-        except multiprocessing.TimeoutError:
-            p.terminate()
-            test_result.timeout = True
-
