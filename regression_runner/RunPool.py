@@ -97,7 +97,7 @@ class RunPool(multiprocessing.pool.Pool):
                 break
             else:
                 time.sleep(self.traverse_interval)
-            
+                
         
     def StartCommandsExecution(self, commands, timeout, test_result):
         """
@@ -145,6 +145,10 @@ class RunPool(multiprocessing.pool.Pool):
             self.TraverseResultObjects()
         del self.finished_result_objects[id]
     
+    
+    def WaitAllCommandsExecution(self):
+        self.WaitFreeWorkers(self.processes)
+
 
     @staticmethod
     def RunCommandsWithTimeout(commands, timeout, test_result):
