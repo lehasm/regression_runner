@@ -110,6 +110,4 @@ class TestRun(unittest.TestCase):
         self.obj.pre_commands = ["echo pre_commands"]
         self.obj.post_commands = ["echo post_commands"]
         self.obj._RunAll()
-        self.obj.pre_commands_result.RemoveLog()
-        self.obj.post_commands_result.RemoveLog()
         

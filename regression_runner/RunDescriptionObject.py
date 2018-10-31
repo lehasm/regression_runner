@@ -132,17 +132,9 @@ class RunDescriptionObject(object):
         to run test commands or run commands of containing objects
         """
         logging.info("pre_commands")
-        self.pre_commands_result = ResultObject(self.GetLogName())
-        RunCommandsWithTimeout(self.pre_commands, 
-                               self.timeout, 
-                               self.pre_commands_result)
-        
+                
         self._RunInner()
                        
         logging.info("post_commands")
-        self.post_commands_result = ResultObject(self.GetLogName())
-        RunCommandsWithTimeout(self.post_commands, 
-                               self.timeout, 
-                               self.post_commands_result)
-    
+        
         
