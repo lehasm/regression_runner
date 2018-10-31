@@ -25,6 +25,8 @@ import subprocess
 import time
 import logging
 
+from regression_runner.ResultObject import ResultObject
+
 
 class NoDaemonProcess(multiprocessing.Process):
     def _get_daemon(self):
@@ -52,20 +54,22 @@ def RunCommands(commands, log_file_name = None):
     return return_codes
 
 
-def RunCommandsWithTimeout(commands, timeout, test_result):
+def RunCommandsWithTimeout(commands, timeout, log_file_name = None):
     max_commands = 3
     logging.info("Run commands (timeout = {}): {} {}".format(
                 timeout, commands[0:max_commands], 
                     "" if len(commands) < max_commands else 
                     "(not all commands shown)"))
 
+    test_result = ResultObject()
     p = multiprocessing.Pool(1)
-    r = p.apply_async(func = RunCommands, args=(commands, test_result.log_file_name))
+    r = p.apply_async(func = RunCommands, args=(commands, log_file_name))
     try:
         test_result.return_codes = r.get(timeout)
     except multiprocessing.TimeoutError:
         p.terminate()
         test_result.timeout = True
+    return test_result
 
 
 class RunPool(multiprocessing.pool.Pool):
@@ -75,8 +79,8 @@ class RunPool(multiprocessing.pool.Pool):
         super(RunPool, self).__init__(processes)
         self.processes = processes
         self.last_process_id = -1
-        self.running_result_objects = {}
-        self.finished_result_objects = {}
+        self.running_processes = {}
+        self.finished_results = {}
         self.traverse_interval = 1
 
     def TerminateAll(self):
@@ -88,71 +92,75 @@ class RunPool(multiprocessing.pool.Pool):
         Iterates over result objects to find finished processes
         Moves these result objects to finished processes array
         """
-        actual_running_result_objects = {}
-        for (id, result_object) in self.running_result_objects.iteritems():
-            if result_object.ready():
-                self.finished_result_objects[id] = result_object
+        actual_running_processes = {}
+        for (id, async_result) in self.running_processes.iteritems():
+            if async_result.ready():
+                self.finished_results[id] = async_result.get()
             else:
-                actual_running_result_objects[id] = result_object
-        self.running_result_objects = actual_running_result_objects
+                actual_running_processes[id] = async_result
+        self.running_processes = actual_running_processes
 
 
     def WaitFreeWorkers(self, free_count = 1):
         assert (0 <= free_count <= self.processes)
         while True:
             self.TraverseResultObjects()
-            if (len(self.running_result_objects) <= 
+            if (len(self.running_processes) <= 
                 self.processes - free_count):
                 break
             else:
                 time.sleep(self.traverse_interval)
                 
         
-    def StartCommandsExecution(self, commands, timeout, test_result):
+    def StartCommandsExecution(self, commands, timeout, log_file = None):
         """
         Sends commands to pool if there are free workers
         If all workers are busy then wait for any to finish
         """
         self.last_process_id += 1
         func = RunCommandsWithTimeout
-        args = (commands, timeout, test_result)
+        args = (commands, timeout, log_file)
         self.WaitFreeWorkers()
         
-        r = self.apply_async(func = func, args = args)
-        self.running_result_objects[self.last_process_id] = r
+        async_result = self.apply_async(func = func, args = args)
+        self.running_processes[self.last_process_id] = async_result
         
         return self.last_process_id
     
     
-    def WaitAnyCommandsExecution(self):
+    def GetAnyResult(self):
         """
-        Returns any finished process id
+        Returns any finished process id and 
+        object with result description
         or False if there is nothing to return or wait
         """
-        if (len(self.finished_result_objects) == 0 and
-            len(self.running_result_objects) == 0):
-                return False
+        if (len(self.finished_results) == 0 and
+            len(self.running_processes) == 0):
+                return (False, False)
         
         while True:
             self.TraverseResultObjects()
-            if (len(self.finished_result_objects) > 0):
-                (id, v) = self.finished_result_objects.popitem()
-                return id
+            if (len(self.finished_results) > 0):
+                (id, r) = self.finished_results.popitem()
+                return (id, r)
             else:
                 time.sleep(self.traverse_interval)            
 
                     
-    def WaitCommandsExecution(self, id):
+    def GetResult(self, id):
         """
-        Returns when the process with given id has finished        
+        Returns result object when the process 
+        with given id has finished        
         If id is unknown to the class then rises exception
         """        
-        assert(id in self.finished_result_objects or
-               id in self.running_result_objects)
-        if (id in self.running_result_objects):
-            self.running_result_objects[id].wait()
+        assert(id in self.finished_results or
+               id in self.running_processes)
+        if (id in self.running_processes):
+            self.running_processes[id].wait()
             self.TraverseResultObjects()
-        del self.finished_result_objects[id]
+        r = self.finished_results[id]
+        del self.finished_results[id]
+        return r
     
     
     def WaitAllCommandsExecution(self):

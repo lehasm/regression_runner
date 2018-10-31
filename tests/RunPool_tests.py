@@ -14,7 +14,6 @@ class TestRun(unittest.TestCase):
     def setUp(self):
         self.processes = 2
         self.obj = RunPool(self.processes)
-        self.result_object = ResultObject()
         self.immediate_commands = ["exit {}".format(i) for i in range(3)]
 
     def tearDown(self):
@@ -22,7 +21,7 @@ class TestRun(unittest.TestCase):
 
     def StartSomeImmediateCommands(self, count):
         for i in range(count):
-            self.obj.StartCommandsExecution(self.immediate_commands, 10, self.result_object)
+            self.obj.StartCommandsExecution(self.immediate_commands, 10)
 
     def test_Init(self):
         self.assertEqual(self.obj.processes, self.processes)
@@ -31,16 +30,16 @@ class TestRun(unittest.TestCase):
     def test_StartCommandsExecution(self):
         count = 2
         for i in range(count):
-            id = self.obj.StartCommandsExecution(self.immediate_commands, 10, self.result_object)
+            id = self.obj.StartCommandsExecution(self.immediate_commands, 10)
             self.assertEqual(id, i)
-        self.assertEqual(len(self.obj.running_result_objects), count)
-        self.assertEqual(len(self.obj.finished_result_objects), 0)
+        self.assertEqual(len(self.obj.running_processes), count)
+        self.assertEqual(len(self.obj.finished_results), 0)
 
         self.obj.WaitFreeWorkers(2)
         self.obj.WaitFreeWorkers()
         
-        self.assertEqual(len(self.obj.running_result_objects), 0)
-        self.assertEqual(len(self.obj.finished_result_objects), count)
+        self.assertEqual(len(self.obj.running_processes), 0)
+        self.assertEqual(len(self.obj.finished_results), count)
         
         
     def test_WaitAnyCommandsExecution(self):
@@ -48,9 +47,10 @@ class TestRun(unittest.TestCase):
         self.StartSomeImmediateCommands(count)
         ids = []
         for i in range(count):
-            ids.append(self.obj.WaitAnyCommandsExecution())
+            (id, r) = self.obj.GetAnyResult()
+            ids.append(id)
         self.assertEqual(sorted(ids), range(count))
-        self.assertEqual(self.obj.WaitAnyCommandsExecution(), False)
+        self.assertEqual(self.obj.GetAnyResult(), (False, False))
     
     
     def test_WaitCommandsExecution(self):
@@ -58,22 +58,22 @@ class TestRun(unittest.TestCase):
         self.StartSomeImmediateCommands(count)
         
         with self.assertRaises(AssertionError):
-            self.obj.WaitCommandsExecution(count + 1)    
+            self.obj.GetResult(count + 1)    
     
         for i in range(count):
-            self.obj.WaitCommandsExecution(i)
+            self.obj.GetResult(i)
         
         with self.assertRaises(AssertionError):
-            self.obj.WaitCommandsExecution(0)    
+            self.obj.GetResult(0)    
     
     
     def test_Execution(self):
-        id = self.obj.StartCommandsExecution(["sleep 1", "exit 2"],
-                10, self.result_object)        
-        self.assertTrue(id in self.obj.running_result_objects)
-        self.obj.WaitCommandsExecution(id)
-        self.assertTrue(id not in self.obj.finished_result_objects)
-        self.assertEqual(self.result_object.return_codes, [0, 2])
+        id = self.obj.StartCommandsExecution(
+                ["sleep 1", "exit 2"], 10)
+        self.assertTrue(id in self.obj.running_processes)
+        result_object = self.obj.GetResult(id)
+        self.assertTrue(id not in self.obj.finished_results)
+        self.assertEqual(result_object.return_codes, [0, 2])
         
         
 
@@ -95,15 +95,13 @@ class TestRun(unittest.TestCase):
             
     #@unittest.skip("skip while debugging")    
     def test_RunCommandsWithTimeout(self):
-        test_result = ResultObject("test.log")
-        timeout = 1
+        timeout = 2
         return_codes = [0, 1, 255]
         commands = ["exit {}".format(r) for r in return_codes]
-        RunCommandsWithTimeout(commands, timeout, test_result)
-        test_result.RemoveLog()
-        self.assertEqual(test_result.return_codes, return_codes)
+        test_result = RunCommandsWithTimeout(commands, timeout)
         self.assertEqual(test_result.timeout, False)
+        self.assertEqual(test_result.return_codes, return_codes)
         
-        RunCommandsWithTimeout(["sleep {}".format(timeout + 1)], timeout, test_result)
+        test_result = RunCommandsWithTimeout(["sleep {}".format(timeout + 1)], timeout)
         self.assertEqual(test_result.timeout, True)
         
